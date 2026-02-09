@@ -83,7 +83,7 @@ function AppContent() {
         
         <footer className="app-footer">
           <p>&copy; 2026 Həkim Dəftəri. Bütün hüquqlar qorunur.</p>
-          <p className="footer-contact">Texniki dəstək: +994 77 310 0313 | doctor.admiin@gmail.com</p>
+          <p className="footer-contact">Hazırladı - Ümid Əsədov</p>
         </footer>
       </main>
     </div>

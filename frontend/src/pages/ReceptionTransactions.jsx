@@ -191,11 +191,7 @@ function ReceptionTransactions() {
 
   const handleStatusChange = async (id, status) => {
     try {
-      if (status === 'tamamlandi') {
-        await axios.delete(`/api/appointments/${id}`);
-      } else {
-        await axios.put(`/api/appointments/${id}`, { status });
-      }
+      await axios.put(`/api/appointments/${id}`, { status });
       fetchAppointments();
     } catch (error) {
       console.error('Status yenilənmədi:', error);
@@ -243,7 +239,7 @@ function ReceptionTransactions() {
       });
 
       if (activeAppt) {
-        await axios.delete(`/api/appointments/${activeAppt.id}`);
+        await axios.put(`/api/appointments/${activeAppt.id}`, { status: 'tamamlandi' });
       }
 
       setShowReceptionModal(false);

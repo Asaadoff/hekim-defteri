@@ -5,3 +5,5 @@ dist/
 desktop/dist/
 backend/hekim.json
 *.zip
+admin-panel/
+LAYIHE_STRUKTURU.md

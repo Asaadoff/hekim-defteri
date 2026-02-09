@@ -268,3 +268,4 @@ Bu sənəd layihənin strukturunu izah edir. Hər hansı dəyişiklik lazım ola
 | 2026-02-09 | `App.jsx`, `index.css` | Footer əlavə edildi (copyright + hazırlayan) |
 | 2026-02-09 | `license.js`, `server.js`, `LicenseActivation.jsx` | Offline lisenziya sistemi əlavə edildi (Trial 14 gün, Hardware ID bağlama) |
 | 2026-02-09 | `license-generator.js` | Admin üçün lisenziya kodu yaratma aləti |
+| 2026-02-09 | `admin-panel/` | Admin Panel yaradıldı (müştəri idarəetməsi, lisenziya generator, statistika) |

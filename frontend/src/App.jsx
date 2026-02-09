@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiDollarSign, FiBarChart2, FiBell, FiCalendar, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiUsers, FiDollarSign, FiBarChart2, FiBell, FiCalendar, FiMenu, FiX, FiMail, FiPhone } from 'react-icons/fi';
 
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
@@ -58,6 +58,16 @@ function AppContent() {
             <FiBell /> Xatırlatmalar
           </NavLink>
         </nav>
+        
+        <div className="sidebar-contact">
+          <div className="sidebar-contact-title">Əlaqə</div>
+          <div className="sidebar-contact-item">
+            <FiPhone /> +994 XX XXX XX XX
+          </div>
+          <div className="sidebar-contact-item">
+            <FiMail /> info@hekim.az
+          </div>
+        </div>
       </aside>
       
       <main className="main-content">

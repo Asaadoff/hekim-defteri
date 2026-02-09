@@ -262,3 +262,4 @@ Bu sənəd layihənin strukturunu izah edir. Hər hansı dəyişiklik lazım ola
 | Tarix | Fayl | Dəyişiklik |
 |-------|------|------------|
 | 2026-02-09 | `Reports.jsx` | İl seçimi 2024-2027 → 2026-2035 dəyişdirildi |
+| 2026-02-09 | `App.jsx`, `index.css` | Sidebar-ın aşağısına Əlaqə bölməsi əlavə edildi |

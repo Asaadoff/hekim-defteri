@@ -7,51 +7,37 @@ import {
 } from 'react-icons/fi';
 
 function ReceptionTransactions() {
-  // ===== TAB STATE =====
-  const [activeTab, setActiveTab] = useState('reception'); // 'reception' | 'transactions'
-
-  // ===== RECEPTION STATE =====
+  // ===== STATE =====
   const [appointments, setAppointments] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [patients, setPatients] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [txLoading, setTxLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [statusFilter, setStatusFilter] = useState('');
 
   // Modals
   const [showApptModal, setShowApptModal] = useState(false);
   const [showReceptionModal, setShowReceptionModal] = useState(false);
   const [showWalkInModal, setShowWalkInModal] = useState(false);
+  const [showTxModal, setShowTxModal] = useState(false);
+  const [showPayModal, setShowPayModal] = useState(false);
 
-  // Active appointment for reception
+  // Active data
   const [activeAppt, setActiveAppt] = useState(null);
-
-  // Appointment form
-  const [apptForm, setApptForm] = useState({
-    patient_id: '', tarix: '', saat: '', tesvir: '', qeyd: ''
-  });
-
-  // Reception form (transaction + payment in one)
-  const [receptionForm, setReceptionForm] = useState({
-    patient_id: '',
-    tesvir: '',
-    mebleg: '',
-    odenis_mebleg: '0',
-    odenis_usulu: 'nagd',
-    son_odenis_tarixi: '',
-    qeyd: ''
-  });
-
-  // Expanded appointment details
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [apptTransactions, setApptTransactions] = useState({});
 
-  // ===== TRANSACTIONS STATE =====
-  const [transactions, setTransactions] = useState([]);
-  const [txLoading, setTxLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [showTxModal, setShowTxModal] = useState(false);
-  const [showPayModal, setShowPayModal] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  // Forms
+  const [apptForm, setApptForm] = useState({
+    patient_id: '', tarix: '', saat: '', tesvir: '', qeyd: ''
+  });
+  const [receptionForm, setReceptionForm] = useState({
+    patient_id: '', tesvir: '', mebleg: '', odenis_mebleg: '0',
+    odenis_usulu: 'nagd', son_odenis_tarixi: '', qeyd: ''
+  });
   const [txFormData, setTxFormData] = useState({
     patient_id: '', tesvir: '', mebleg: '', odenis_mebleg: '0', son_odenis_tarixi: ''
   });
@@ -63,6 +49,7 @@ function ReceptionTransactions() {
   useEffect(() => {
     fetchPatients();
     fetchServices();
+    fetchTransactions();
   }, []);
 
   useEffect(() => {
@@ -70,10 +57,8 @@ function ReceptionTransactions() {
   }, [selectedDate]);
 
   useEffect(() => {
-    if (activeTab === 'transactions') {
-      fetchTransactions();
-    }
-  }, [statusFilter, activeTab]);
+    fetchTransactions();
+  }, [statusFilter]);
 
   const fetchAppointments = async () => {
     try {
@@ -248,6 +233,7 @@ function ReceptionTransactions() {
         const txs = await fetchPatientTransactions(receptionForm.patient_id);
         setApptTransactions(prev => ({ ...prev, [receptionForm.patient_id]: txs }));
       }
+      fetchTransactions();
     } catch (error) {
       console.error('Qəbul xətası:', error);
     }
@@ -358,75 +344,52 @@ function ReceptionTransactions() {
       <div className="page-header">
         <h2>Qəbul və Əməliyyatlar</h2>
         <div className="page-header-actions">
-          {activeTab === 'reception' && (
-            <>
-              <button className="btn btn-success" onClick={openWalkIn}>
-                <FiUserPlus /> Randevusuz Qəbul
-              </button>
-              <button className="btn btn-primary" onClick={() => {
-                setApptForm({ patient_id: '', tarix: selectedDate, saat: '', tesvir: '', qeyd: '' });
-                setShowApptModal(true);
-              }}>
-                <FiPlus /> Yeni Randevu
-              </button>
-            </>
-          )}
-          {activeTab === 'transactions' && (
-            <button className="btn btn-primary" onClick={() => {
-              setTxFormData({ patient_id: '', tesvir: '', mebleg: '', odenis_mebleg: '0', son_odenis_tarixi: '' });
-              setShowTxModal(true);
-            }}>
-              <FiPlus /> Yeni Əməliyyat
-            </button>
-          )}
+          <button className="btn btn-success" onClick={openWalkIn}>
+            <FiUserPlus /> Randevusuz Qəbul
+          </button>
+          <button className="btn btn-primary" onClick={() => {
+            setApptForm({ patient_id: '', tarix: selectedDate, saat: '', tesvir: '', qeyd: '' });
+            setShowApptModal(true);
+          }}>
+            <FiPlus /> Yeni Randevu
+          </button>
+          <button className="btn btn-primary" onClick={() => {
+            setTxFormData({ patient_id: '', tesvir: '', mebleg: '', odenis_mebleg: '0', son_odenis_tarixi: '' });
+            setShowTxModal(true);
+          }}>
+            <FiPlus /> Yeni Əməliyyat
+          </button>
         </div>
       </div>
 
-      {/* Tab Switcher */}
-      <div className="unified-tabs">
-        <button
-          className={`unified-tab ${activeTab === 'reception' ? 'active' : ''}`}
-          onClick={() => setActiveTab('reception')}
-        >
-          <FiCalendar /> Günlük Cədvəl
-        </button>
-        <button
-          className={`unified-tab ${activeTab === 'transactions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('transactions')}
-        >
-          <FiList /> Bütün Əməliyyatlar
-        </button>
-      </div>
+      {/* ==================== RANDEVU BÖLMƏSI ==================== */}
 
-      {/* ==================== RECEPTION TAB ==================== */}
-      {activeTab === 'reception' && (
-        <>
-          {/* Date Navigation */}
-          <div className="date-nav-card">
-            <div className="date-nav-row">
-              <button className="date-nav-arrow" onClick={() => changeDate(-1)}>
-                <FiChevronLeft />
+      {/* Date Navigation */}
+      <div className="date-nav-card">
+        <div className="date-nav-row">
+          <button className="date-nav-arrow" onClick={() => changeDate(-1)}>
+            <FiChevronLeft />
+          </button>
+          <div className="date-nav-center" onClick={() => document.getElementById('date-picker-input').showPicker?.() || document.getElementById('date-picker-input').focus()}>
+            <span className="date-nav-date">{formatDate(selectedDate)}</span>
+            {isToday ? (
+              <span className="date-nav-today">● Bugün</span>
+            ) : (
+              <button className="date-nav-back" onClick={(e) => { e.stopPropagation(); setSelectedDate(new Date().toISOString().split('T')[0]); }}>
+                Bugünə qayıt
               </button>
-              <div className="date-nav-center" onClick={() => document.getElementById('date-picker-input').showPicker?.() || document.getElementById('date-picker-input').focus()}>
-                <span className="date-nav-date">{formatDate(selectedDate)}</span>
-                {isToday ? (
-                  <span className="date-nav-today">● Bugün</span>
-                ) : (
-                  <button className="date-nav-back" onClick={(e) => { e.stopPropagation(); setSelectedDate(new Date().toISOString().split('T')[0]); }}>
-                    Bugünə qayıt
-                  </button>
-                )}
-              </div>
-              <button className="date-nav-arrow" onClick={() => changeDate(1)}>
-                <FiChevronRight />
-              </button>
-            </div>
-            <input
-              id="date-picker-input"
-              type="date"
-              value={selectedDate}
-              min="2026-01-01"
-              max="2035-12-31"
+            )}
+          </div>
+          <button className="date-nav-arrow" onClick={() => changeDate(1)}>
+            <FiChevronRight />
+          </button>
+        </div>
+        <input
+          id="date-picker-input"
+          type="date"
+          value={selectedDate}
+          min="2026-01-01"
+          max="2035-12-31"
               onChange={e => { if (e.target.value) setSelectedDate(e.target.value); }}
               className="date-nav-hidden-input"
             />
@@ -584,15 +547,13 @@ function ReceptionTransactions() {
               </div>
             )}
           </div>
-        </>
-      )}
 
-      {/* ==================== TRANSACTIONS TAB ==================== */}
-      {activeTab === 'transactions' && (
-        <div className="card">
-          <div className="card-header">
-            <div className="filter-row">
-              <FiFilter />
+      {/* ==================== ƏMƏLIYYATLAR BÖLMƏSI ==================== */}
+      <div className="card" style={{ marginTop: '1.5rem' }}>
+        <div className="card-header">
+          <h3 className="card-title"><FiList style={{ marginRight: '0.5rem' }} /> Bütün Əməliyyatlar</h3>
+          <div className="filter-row">
+            <FiFilter />
               <select
                 className="form-control filter-select"
                 value={statusFilter}
@@ -673,7 +634,6 @@ function ReceptionTransactions() {
             </table>
           </div>
         </div>
-      )}
 
       {/* =============== MODALS =============== */}
 

@@ -71,7 +71,7 @@ function Reports() {
             value={selectedYear}
             onChange={e => setSelectedYear(e.target.value)}
           >
-            {[2024, 2025, 2026, 2027].map(y => (
+            {[2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035].map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>

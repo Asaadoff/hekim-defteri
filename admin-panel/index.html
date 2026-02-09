@@ -457,19 +457,19 @@
       </div>
       
       <nav>
-        <div class="nav-item active" data-page="dashboard">
+        <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           İdarə Paneli
         </div>
-        <div class="nav-item" data-page="licenses">
+        <div class="nav-item" data-page="licenses" onclick="showPage('licenses')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
           Lisenziyalar
         </div>
-        <div class="nav-item" data-page="customers">
+        <div class="nav-item" data-page="customers" onclick="showPage('customers')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Müştərilər
         </div>
-        <div class="nav-item" data-page="settings">
+        <div class="nav-item" data-page="settings" onclick="showPage('settings')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Ayarlar
         </div>
@@ -735,30 +735,58 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      appData = await ipcRenderer.invoke('get-data');
+      // Setup navigation first (without waiting for data)
+      setupNavigation();
+      setupForms();
+      
+      try {
+        appData = await ipcRenderer.invoke('get-data');
+      } catch (err) {
+        console.error('Data load error:', err);
+        appData = { customers: [], licenses: [], settings: {} };
+      }
+      
       updateDashboard();
       renderCustomers();
       renderLicenses();
-      setupNavigation();
-      setupForms();
     });
 
     // Navigation
     function setupNavigation() {
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const page = item.dataset.page;
+      const navItems = document.querySelectorAll('.nav-item');
+      console.log('Nav items found:', navItems.length);
+      
+      navItems.forEach(item => {
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.dataset.page;
+          console.log('Nav click:', page);
           showPage(page);
         });
       });
     }
 
     function showPage(pageName) {
+      console.log('Showing page:', pageName);
+      
+      // Hide all pages
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      
+      // Remove active from all nav items
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       
-      document.getElementById(pageName).classList.add('active');
-      document.querySelector(`.nav-item[data-page="${pageName}"]`).classList.add('active');
+      // Show selected page
+      const pageEl = document.getElementById(pageName);
+      if (pageEl) {
+        pageEl.classList.add('active');
+      }
+      
+      // Activate nav item
+      const navEl = document.querySelector(`.nav-item[data-page="${pageName}"]`);
+      if (navEl) {
+        navEl.classList.add('active');
+      }
     }
 
     // Dashboard

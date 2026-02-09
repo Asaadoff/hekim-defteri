@@ -264,3 +264,4 @@ Bu sənəd layihənin strukturunu izah edir. Hər hansı dəyişiklik lazım ola
 | 2026-02-09 | `Reports.jsx` | İl seçimi 2024-2027 → 2026-2035 dəyişdirildi |
 | 2026-02-09 | `App.jsx`, `index.css` | Sidebar-ın aşağısına Əlaqə bölməsi əlavə edildi |
 | 2026-02-09 | `App.jsx` | Əlaqə məlumatları yeniləndi: +994 77 310 0313, doctor.admiin@gmail.com |
+| 2026-02-09 | `App.jsx` | Sidebar alt başlığı: "Borc və Nisyə İdarəetmə" → "Maliyyə idarəetmə sistemi" |

@@ -35,7 +35,7 @@ function AppContent() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h1>Həkim Dəftəri</h1>
-          <p>Borc və Nisyə İdarəetmə</p>
+          <p>Maliyyə idarəetmə sistemi</p>
         </div>
         
         <nav className="sidebar-nav">

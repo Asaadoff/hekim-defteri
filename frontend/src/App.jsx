@@ -62,10 +62,10 @@ function AppContent() {
         <div className="sidebar-contact">
           <div className="sidebar-contact-title">Əlaqə</div>
           <div className="sidebar-contact-item">
-            <FiPhone /> +994 XX XXX XX XX
+            <FiPhone /> +994 77 310 0313
           </div>
           <div className="sidebar-contact-item">
-            <FiMail /> info@hekim.az
+            <FiMail /> doctor.admiin@gmail.com
           </div>
         </div>
       </aside>

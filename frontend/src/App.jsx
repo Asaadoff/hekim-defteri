@@ -80,6 +80,11 @@ function AppContent() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/reminders" element={<Reminders />} />
         </Routes>
+        
+        <footer className="app-footer">
+          <p>&copy; 2026 Həkim Dəftəri. Bütün hüquqlar qorunur.</p>
+          <p className="footer-contact">Texniki dəstək: +994 77 310 0313 | doctor.admiin@gmail.com</p>
+        </footer>
       </main>
     </div>
   );

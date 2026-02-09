@@ -2706,3 +2706,229 @@ tr:hover {
   font-size: 0.8rem;
   opacity: 0.8;
 }
+
+/* ===== LICENSE ACTIVATION SCREEN ===== */
+.license-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+}
+
+.license-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.license-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.license-header .license-icon {
+  font-size: 3rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.license-header h1 {
+  font-size: 1.5rem;
+  color: var(--text);
+  margin: 0 0 0.5rem 0;
+}
+
+.license-header p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.license-hardware {
+  margin-bottom: 1.5rem;
+}
+
+.license-hardware label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.hardware-id-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.hardware-id-box span {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+
+.hardware-id-box button {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+
+.hardware-id-box button:hover {
+  color: var(--primary-dark);
+}
+
+.license-trial-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.license-expired {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.license-input-group {
+  margin-bottom: 1rem;
+}
+
+.license-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.license-input-group input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: border-color 0.2s;
+}
+
+.license-input-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.license-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.license-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.license-buttons .btn-activate {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.license-buttons .btn-activate:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.license-buttons .btn-activate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.license-buttons .btn-trial {
+  width: 100%;
+  padding: 0.875rem;
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.license-buttons .btn-trial:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.license-contact {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.license-contact p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.license-loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.license-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

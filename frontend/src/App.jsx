@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { FiHome, FiUsers, FiDollarSign, FiBarChart2, FiBell, FiCalendar, FiMenu, FiX, FiMail, FiPhone } from 'react-icons/fi';
+import axios from 'axios';
 
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
@@ -9,15 +10,53 @@ import Payments from './pages/Payments';
 import Reports from './pages/Reports';
 import Reminders from './pages/Reminders';
 import SearchBar from './components/SearchBar';
+import LicenseActivation from './components/LicenseActivation';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [licenseValid, setLicenseValid] = useState(null);
+  const [licenseInfo, setLicenseInfo] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    checkLicense();
+  }, []);
+
+  const checkLicense = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/license/status`);
+      setLicenseInfo(response.data);
+      setLicenseValid(response.data.valid);
+    } catch (err) {
+      // If can't check license, allow app to run (development mode)
+      setLicenseValid(true);
+    }
+  };
 
   // Close sidebar on navigation (mobile)
   const handleNavClick = () => {
     setSidebarOpen(false);
   };
+
+  // Show license activation screen if not valid
+  if (licenseValid === null) {
+    return (
+      <div className="license-screen">
+        <div className="license-card">
+          <div className="license-loading">
+            <div className="spinner"></div>
+            <p>Yüklənir...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (licenseValid === false) {
+    return <LicenseActivation onActivated={() => setLicenseValid(true)} />;
+  }
 
   return (
     <div className="app">

@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const database = require('./database');
 const { createBackup, restoreBackup, listBackups } = require('./database');
+const license = require('./license');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,6 +14,38 @@ app.use(express.json());
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'frontend')));
+
+// ===== LICENSE API =====
+app.get('/api/license/status', (req, res) => {
+  try {
+    const status = license.checkLicense();
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/license/hardware-id', (req, res) => {
+  try {
+    const hardwareId = license.getHardwareId();
+    res.json({ hardwareId });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/license/activate', (req, res) => {
+  try {
+    const { licenseKey } = req.body;
+    if (!licenseKey) {
+      return res.status(400).json({ success: false, message: 'Lisenziya kodu tələb olunur' });
+    }
+    const result = license.activateLicense(licenseKey);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // ===== API ROUTES =====
 

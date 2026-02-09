@@ -266,3 +266,5 @@ Bu sənəd layihənin strukturunu izah edir. Hər hansı dəyişiklik lazım ola
 | 2026-02-09 | `App.jsx` | Əlaqə məlumatları yeniləndi: +994 77 310 0313, doctor.admiin@gmail.com |
 | 2026-02-09 | `App.jsx` | Sidebar alt başlığı: "Borc və Nisyə İdarəetmə" → "Maliyyə idarəetmə sistemi" |
 | 2026-02-09 | `App.jsx`, `index.css` | Footer əlavə edildi (copyright + hazırlayan) |
+| 2026-02-09 | `license.js`, `server.js`, `LicenseActivation.jsx` | Offline lisenziya sistemi əlavə edildi (Trial 14 gün, Hardware ID bağlama) |
+| 2026-02-09 | `license-generator.js` | Admin üçün lisenziya kodu yaratma aləti |

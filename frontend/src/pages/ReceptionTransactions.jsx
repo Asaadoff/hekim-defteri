@@ -45,6 +45,10 @@ function ReceptionTransactions() {
     mebleg: '', odenis_usulu: 'nagd', qeyd: ''
   });
 
+  // Quick Patient
+  const [showQuickPatient, setShowQuickPatient] = useState(false);
+  const [quickPatientForm, setQuickPatientForm] = useState({ ad: '', soyad: '', telefon: '' });
+
   // ===== DATA FETCHING =====
   useEffect(() => {
     fetchPatients();
@@ -78,6 +82,26 @@ function ReceptionTransactions() {
       setPatients(response.data);
     } catch (error) {
       console.error('Xəstələr yüklənmədi:', error);
+    }
+  };
+
+  // Quick patient creation
+  const handleQuickPatientCreate = async () => {
+    if (!quickPatientForm.ad || !quickPatientForm.soyad) {
+      alert('Ad və soyad tələb olunur!');
+      return null;
+    }
+    try {
+      const response = await axios.post('/api/patients', quickPatientForm);
+      const newPatient = response.data;
+      await fetchPatients(); // Refresh patient list
+      setQuickPatientForm({ ad: '', soyad: '', telefon: '' });
+      setShowQuickPatient(false);
+      return newPatient.id;
+    } catch (error) {
+      console.error('Xəstə yaradılmadı:', error);
+      alert('Xəstə yaradılarkən xəta baş verdi!');
+      return null;
     }
   };
 
@@ -645,15 +669,55 @@ function ReceptionTransactions() {
               <h3>{apptForm.id ? 'Randevunu Redaktə Et' : 'Yeni Randevu'}</h3>
               <button className="modal-close" onClick={() => setShowApptModal(false)}>&times;</button>
             </div>
-            <form onSubmit={handleApptSubmit}>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              let patientId = apptForm.patient_id;
+              if (showQuickPatient) {
+                patientId = await handleQuickPatientCreate();
+                if (!patientId) return;
+                setApptForm(prev => ({ ...prev, patient_id: patientId }));
+              }
+              if (!patientId) { alert('Xəstə seçin və ya yeni xəstə əlavə edin!'); return; }
+              const formToSubmit = { ...apptForm, patient_id: patientId };
+              try {
+                if (formToSubmit.id) {
+                  await axios.put(`/api/appointments/${formToSubmit.id}`, formToSubmit);
+                } else {
+                  await axios.post('/api/appointments', formToSubmit);
+                }
+                setShowApptModal(false);
+                setShowQuickPatient(false);
+                setApptForm({ patient_id: '', tarix: '', saat: '', tesvir: '', qeyd: '' });
+                fetchAppointments();
+              } catch (error) {
+                console.error('Xəta:', error);
+              }
+            }}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Xəstə *</label>
-                  <select className="form-control" value={apptForm.patient_id}
-                    onChange={e => setApptForm({ ...apptForm, patient_id: e.target.value })} required>
-                    <option value="">Xəstə seçin</option>
-                    {patients.map(p => <option key={p.id} value={p.id}>{p.ad} {p.soyad}</option>)}
-                  </select>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label style={{ margin: 0 }}>Xəstə *</label>
+                    <button type="button" className="btn btn-sm" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      onClick={() => { setShowQuickPatient(!showQuickPatient); setApptForm({ ...apptForm, patient_id: '' }); }}>
+                      {showQuickPatient ? '← Mövcud Xəstə' : '+ Yeni Xəstə'}
+                    </button>
+                  </div>
+                  {!showQuickPatient ? (
+                    <select className="form-control" value={apptForm.patient_id}
+                      onChange={e => setApptForm({ ...apptForm, patient_id: e.target.value })} required={!showQuickPatient}>
+                      <option value="">Xəstə seçin</option>
+                      {patients.map(p => <option key={p.id} value={p.id}>{p.ad} {p.soyad}</option>)}
+                    </select>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input type="text" className="form-control" placeholder="Ad *" value={quickPatientForm.ad}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, ad: e.target.value })} required />
+                      <input type="text" className="form-control" placeholder="Soyad *" value={quickPatientForm.soyad}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, soyad: e.target.value })} required />
+                      <input type="text" className="form-control" placeholder="Telefon" value={quickPatientForm.telefon}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, telefon: e.target.value })} />
+                    </div>
+                  )}
                 </div>
                 <div className="form-row">
                   <div className="form-group">
@@ -778,15 +842,50 @@ function ReceptionTransactions() {
               <h3><FiUserPlus style={{ marginRight: '0.5rem' }} /> Randevusuz Qəbul</h3>
               <button className="modal-close" onClick={() => setShowWalkInModal(false)}>&times;</button>
             </div>
-            <form onSubmit={handleReceptionSubmit}>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              let patientId = receptionForm.patient_id;
+              if (showQuickPatient) {
+                patientId = await handleQuickPatientCreate();
+                if (!patientId) return;
+              }
+              if (!patientId) { alert('Xəstə seçin və ya yeni xəstə əlavə edin!'); return; }
+              const formToSubmit = { ...receptionForm, patient_id: patientId };
+              try {
+                await axios.post('/api/transactions', formToSubmit);
+                setShowWalkInModal(false);
+                setShowQuickPatient(false);
+                setReceptionForm({ patient_id: '', tesvir: '', mebleg: '', odenis_mebleg: '0', odenis_usulu: 'nagd', son_odenis_tarixi: '', qeyd: '' });
+                fetchTransactions();
+              } catch (error) {
+                console.error('Xəta:', error);
+              }
+            }}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Xəstə *</label>
-                  <select className="form-control" value={receptionForm.patient_id}
-                    onChange={e => setReceptionForm({ ...receptionForm, patient_id: e.target.value })} required>
-                    <option value="">Xəstə seçin</option>
-                    {patients.map(p => <option key={p.id} value={p.id}>{p.ad} {p.soyad}</option>)}
-                  </select>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label style={{ margin: 0 }}>Xəstə *</label>
+                    <button type="button" className="btn btn-sm" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      onClick={() => { setShowQuickPatient(!showQuickPatient); setReceptionForm({ ...receptionForm, patient_id: '' }); }}>
+                      {showQuickPatient ? '← Mövcud Xəstə' : '+ Yeni Xəstə'}
+                    </button>
+                  </div>
+                  {!showQuickPatient ? (
+                    <select className="form-control" value={receptionForm.patient_id}
+                      onChange={e => setReceptionForm({ ...receptionForm, patient_id: e.target.value })} required={!showQuickPatient}>
+                      <option value="">Xəstə seçin</option>
+                      {patients.map(p => <option key={p.id} value={p.id}>{p.ad} {p.soyad}</option>)}
+                    </select>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input type="text" className="form-control" placeholder="Ad *" value={quickPatientForm.ad}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, ad: e.target.value })} required />
+                      <input type="text" className="form-control" placeholder="Soyad *" value={quickPatientForm.soyad}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, soyad: e.target.value })} required />
+                      <input type="text" className="form-control" placeholder="Telefon" value={quickPatientForm.telefon}
+                        onChange={e => setQuickPatientForm({ ...quickPatientForm, telefon: e.target.value })} />
+                    </div>
+                  )}
                 </div>
 
                 {services.length > 0 && (

@@ -52,21 +52,87 @@ const getHardwareId = () => {
 // Secret key for license validation (keep this secret!)
 const SECRET_KEY = 'HekimDefteri2026SecretKey!@#';
 
+// Parse expiry date from license key (YYMMDD suffix)
+const parseExpiryFromKey = (licenseKey) => {
+  // Format: HEKIM-XXXXX-XXXXX-XXXXX-XXXXX or HEKIM-XXXXX-XXXXX-XXXXX-XXXXX-YYMMDD
+  // Trim trailing dashes and whitespace
+  const cleanKey = licenseKey.replace(/[-\s]+$/, '').trim();
+  const parts = cleanKey.split('-');
+  if (parts.length === 6) {
+    // Has expiry date suffix
+    const dateCode = parts[5];
+    if (dateCode.length === 6) {
+      const year = 2000 + parseInt(dateCode.substring(0, 2));
+      const month = parseInt(dateCode.substring(2, 4));
+      const day = parseInt(dateCode.substring(4, 6));
+      // Return as YYYY-MM-DD string for consistent comparison
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+  }
+  return null; // Lifetime license
+};
+
+// Check if expiry date has passed
+const isExpired = (expiryDateStr) => {
+  if (!expiryDateStr) return false;
+  const [year, month, day] = expiryDateStr.split('-').map(Number);
+  const expiry = new Date(year, month - 1, day, 23, 59, 59);
+  return new Date() > expiry;
+};
+
+// Get days left until expiry
+const getDaysLeft = (expiryDateStr) => {
+  if (!expiryDateStr) return null;
+  const [year, month, day] = expiryDateStr.split('-').map(Number);
+  const expiry = new Date(year, month - 1, day, 23, 59, 59);
+  const now = new Date();
+  return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+};
+
+// Get base license key (without expiry suffix)
+const getBaseLicenseKey = (licenseKey) => {
+  // Clean trailing dashes and whitespace
+  const cleanKey = licenseKey.replace(/[-\s]+$/, '').trim();
+  const parts = cleanKey.split('-');
+  if (parts.length === 6 && parts[5].length === 6) {
+    return parts.slice(0, 5).join('-');
+  }
+  return parts.slice(0, 5).join('-'); // Return first 5 parts always
+};
+
 // Generate license key from hardware ID (used by admin tool)
-const generateLicenseKey = (hardwareId, type = 'lifetime') => {
-  const data = `${hardwareId}|${type}|${SECRET_KEY}`;
+const generateLicenseKey = (hardwareId, expiryDate = null) => {
+  const expiryStr = expiryDate || 'lifetime';
+  const data = `${hardwareId}|${expiryStr}|${SECRET_KEY}`;
   const hash = crypto.createHash('sha256').update(data).digest('hex');
   
   // Format as license key
   const key = hash.substring(0, 20).toUpperCase();
-  return `HEKIM-${key.substring(0, 5)}-${key.substring(5, 10)}-${key.substring(10, 15)}-${key.substring(15, 20)}`;
+  let licenseKey = `HEKIM-${key.substring(0, 5)}-${key.substring(5, 10)}-${key.substring(10, 15)}-${key.substring(15, 20)}`;
+  
+  // Add expiry suffix if not lifetime
+  if (expiryDate && expiryDate !== 'lifetime') {
+    // expiryDate is YYYY-MM-DD string
+    const [year, month, day] = expiryDate.split('-').map(Number);
+    const dateCode = `${String(year).slice(-2)}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+    licenseKey += `-${dateCode}`;
+  }
+  
+  return licenseKey;
 };
 
 // Validate license key against hardware ID
 const validateLicenseKey = (licenseKey, hardwareId) => {
-  // Generate expected key for this hardware
-  const expectedKey = generateLicenseKey(hardwareId, 'lifetime');
-  return licenseKey === expectedKey;
+  // Parse expiry date from key (as YYYY-MM-DD string)
+  const expiryDateStr = parseExpiryFromKey(licenseKey);
+  const baseKey = getBaseLicenseKey(licenseKey);
+  
+  // Generate expected key for this hardware with same expiry
+  const expiryStr = expiryDateStr || 'lifetime';
+  const expectedKey = generateLicenseKey(hardwareId, expiryStr);
+  const expectedBaseKey = getBaseLicenseKey(expectedKey);
+  
+  return baseKey === expectedBaseKey;
 };
 
 // Load license data
@@ -140,10 +206,37 @@ const checkLicense = () => {
     };
   }
   
+  // Check expiry date (now returns YYYY-MM-DD string or null)
+  const expiryDateStr = parseExpiryFromKey(license.key);
+  if (expiryDateStr) {
+    if (isExpired(expiryDateStr)) {
+      const daysAgo = Math.abs(getDaysLeft(expiryDateStr));
+      return {
+        valid: false,
+        type: 'expired',
+        message: `Lisenziya müddəti ${daysAgo} gün əvvəl bitdi. Yeni lisenziya alın.`,
+        expiryDate: expiryDateStr,
+        hardwareId
+      };
+    }
+    
+    // Calculate days left
+    const daysLeft = getDaysLeft(expiryDateStr);
+    return {
+      valid: true,
+      type: 'licensed',
+      message: daysLeft <= 30 ? `Lisenziyanın bitmə tarixi: ${daysLeft} gün qaldı` : 'Lisenziya aktivdir',
+      expiryDate: expiryDateStr,
+      daysLeft,
+      activatedAt: license.activatedAt,
+      hardwareId
+    };
+  }
+  
   return {
     valid: true,
     type: 'licensed',
-    message: 'Lisenziya aktivdir',
+    message: 'Lisenziya aktivdir (Limitsiz)',
     activatedAt: license.activatedAt,
     hardwareId
   };
@@ -222,26 +315,45 @@ const checkTrialStatus = () => {
 const activateLicense = (licenseKey) => {
   const hardwareId = getHardwareId();
   
+  // Clean the license key - remove trailing dashes and whitespace
+  const cleanKey = licenseKey.replace(/[-\s]+$/, '').trim();
+  
   // Validate key
-  if (!validateLicenseKey(licenseKey, hardwareId)) {
+  if (!validateLicenseKey(cleanKey, hardwareId)) {
     return {
       success: false,
       message: 'Lisenziya kodu yanlışdır və ya bu kompüter üçün deyil'
     };
   }
   
-  // Save license
+  // Check if already expired
+  const expiryDateStr = parseExpiryFromKey(cleanKey);
+  if (expiryDateStr && isExpired(expiryDateStr)) {
+    return {
+      success: false,
+      message: 'Bu lisenziyanın müddəti artıq bitib'
+    };
+  }
+  
+  // Save license (use cleaned key)
   const licenseData = {
-    key: licenseKey,
+    key: cleanKey,
     hardwareId,
     activatedAt: new Date().toISOString(),
-    type: 'lifetime'
+    expiryDate: expiryDateStr,
+    type: expiryDateStr ? 'limited' : 'lifetime'
   };
   
   if (saveLicense(licenseData)) {
+    let expiryMsg = ' (Limitsiz)';
+    if (expiryDateStr) {
+      const [year, month, day] = expiryDateStr.split('-').map(Number);
+      const d = new Date(year, month - 1, day);
+      expiryMsg = ` (${d.toLocaleDateString('az-AZ')}-dək)`;
+    }
     return {
       success: true,
-      message: 'Lisenziya uğurla aktivləşdirildi!'
+      message: 'Lisenziya uğurla aktivləşdirildi!' + expiryMsg
     };
   }
   

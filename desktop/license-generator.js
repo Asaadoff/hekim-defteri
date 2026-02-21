@@ -31,7 +31,7 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   console.log('');
   console.log('╔════════════════════════════════════════════════════════╗');
-  console.log('║         HƏKİM BORC DƏFTƏRİ - LİSENZİYA GENERATOR       ║');
+  console.log('║           HƎKİM DƎFTƎRİ - LİSENZİYA GENERATOR         ║');
   console.log('╚════════════════════════════════════════════════════════╝');
   console.log('');
   console.log('İstifadə: node license-generator.js <HARDWARE-ID>');

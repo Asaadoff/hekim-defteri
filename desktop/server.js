@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const database = require('./database');
-const { createBackup, restoreBackup, listBackups } = require('./database');
+const { createBackup, restoreBackup, listBackups, autoBackupIfNeeded } = require('./database');
 const license = require('./license');
 
 const app = express();
@@ -11,6 +11,16 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Auto backup on server start
+try {
+  const backupResult = autoBackupIfNeeded();
+  if (backupResult.created) {
+    console.log(`[Server] Avtomatik backup yaratıldı: ${backupResult.reason}`);
+  }
+} catch (err) {
+  console.error('[Server] Auto backup xətası:', err);
+}
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'frontend')));
@@ -508,6 +518,15 @@ app.get('/api/app/version', (req, res) => {
 // Serve frontend for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
+// Global error handler middleware (must be after all routes)
+app.use((err, req, res, next) => {
+  console.error('[Server Xəta]:', err);
+  res.status(500).json({ 
+    error: 'Server xətası baş verdi',
+    details: err.message 
+  });
 });
 
 app.listen(PORT, () => {

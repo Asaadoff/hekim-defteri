@@ -1,7 +1,7 @@
 {
   "name": "hekim-borc-defteri",
   "version": "1.0.0",
-  "description": "Həkim Borc Dəftəri - Xəstə borc və nisyə idarəetmə sistemi",
+  "description": "Həkim dəftəri - Xəstə borc və nisiyə idarəetmə sistemi",
   "main": "main.js",
   "author": "Hekim",
   "license": "MIT",
@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.hekim.borcdefteri",
-    "productName": "Hekim Borc Defteri",
+    "productName": "Hekim defteri",
     "directories": {
       "output": "dist"
     },
@@ -32,6 +32,7 @@
       "main.js",
       "server.js",
       "database.js",
+      "license.js",
       "frontend/**/*",
       "node_modules/**/*",
       "package.json"
@@ -58,7 +59,7 @@
       "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Hekim Borc Defteri"
+      "shortcutName": "Hekim defteri"
     },
     "portable": {
       "artifactName": "${productName}-Portable-${version}.${ext}"

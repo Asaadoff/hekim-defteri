@@ -107,6 +107,37 @@ const listBackups = () => {
   }
 };
 
+// Auto backup if last backup is older than 24 hours
+const autoBackupIfNeeded = () => {
+  try {
+    const backups = listBackups();
+    
+    if (backups.length === 0) {
+      // Heç backup yoxdur, ilk backup yarat
+      console.log('[AutoBackup] İlk backup yaratılır...');
+      createBackup();
+      return { created: true, reason: 'ilk_backup' };
+    }
+    
+    // Son backup-ın tarixi
+    const lastBackupDate = new Date(backups[0].date);
+    const now = new Date();
+    const hoursSinceLastBackup = (now - lastBackupDate) / (1000 * 60 * 60);
+    
+    if (hoursSinceLastBackup >= 24) {
+      console.log(`[AutoBackup] Son backup ${Math.floor(hoursSinceLastBackup)} saat əvvəl. Avtomatik backup yaratılır...`);
+      createBackup();
+      return { created: true, reason: 'gündəlik', hoursSince: Math.floor(hoursSinceLastBackup) };
+    }
+    
+    console.log(`[AutoBackup] Son backup ${Math.floor(hoursSinceLastBackup)} saat əvvəl. Backup lazım deyil.`);
+    return { created: false, hoursSince: Math.floor(hoursSinceLastBackup) };
+  } catch (err) {
+    console.error('[AutoBackup] Xəta:', err);
+    return { created: false, error: err.message };
+  }
+};
+
 // Default data structure
 const defaultData = {
   patients: [],
@@ -841,3 +872,4 @@ module.exports = database;
 module.exports.createBackup = createBackup;
 module.exports.restoreBackup = restoreBackup;
 module.exports.listBackups = listBackups;
+module.exports.autoBackupIfNeeded = autoBackupIfNeeded;

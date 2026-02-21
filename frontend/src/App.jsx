@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiDollarSign, FiBarChart2, FiBell, FiCalendar, FiMenu, FiX, FiMail, FiPhone } from 'react-icons/fi';
+import { FiHome, FiUsers, FiDollarSign, FiBarChart2, FiBell, FiCalendar, FiMenu, FiX, FiMail, FiPhone, FiSettings } from 'react-icons/fi';
 import axios from 'axios';
 
 import Dashboard from './pages/Dashboard';
@@ -9,6 +9,7 @@ import ReceptionTransactions from './pages/ReceptionTransactions';
 import Payments from './pages/Payments';
 import Reports from './pages/Reports';
 import Reminders from './pages/Reminders';
+import Settings from './pages/Settings';
 import SearchBar from './components/SearchBar';
 import LicenseActivation from './components/LicenseActivation';
 
@@ -24,14 +25,32 @@ function AppContent() {
     checkLicense();
   }, []);
 
-  const checkLicense = async () => {
+  const checkLicense = async (retryCount = 0) => {
     try {
+      console.log('Checking license... attempt:', retryCount + 1);
       const response = await axios.get(`${API_URL}/license/status`);
+      console.log('License response:', response.data);
       setLicenseInfo(response.data);
-      setLicenseValid(response.data.valid);
+      
+      // Allow access if license is valid (including trial)
+      if (response.data.valid) {
+        console.log('License valid, allowing access');
+        setLicenseValid(true);
+      } else {
+        console.log('License not valid:', response.data.type);
+        // Expired - show activation screen
+        setLicenseValid(false);
+      }
     } catch (err) {
-      // If can't check license, allow app to run (development mode)
-      setLicenseValid(true);
+      console.error('License check error:', err);
+      // Retry up to 5 times with 1 second delay
+      if (retryCount < 5) {
+        console.log('Retrying license check in 1 second...');
+        setTimeout(() => checkLicense(retryCount + 1), 1000);
+      } else {
+        // If can't check license after retries, show activation screen
+        setLicenseValid(false);
+      }
     }
   };
 
@@ -96,6 +115,9 @@ function AppContent() {
           <NavLink to="/reminders" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={handleNavClick}>
             <FiBell /> Xatırlatmalar
           </NavLink>
+          <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={handleNavClick}>
+            <FiSettings /> Ayarlar
+          </NavLink>
         </nav>
         
         <div className="sidebar-contact">
@@ -118,6 +140,7 @@ function AppContent() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reminders" element={<Reminders />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
         
         <footer className="app-footer">

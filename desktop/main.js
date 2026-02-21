@@ -3,8 +3,20 @@ const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const { createBackup } = require('./database');
 
+// ===== GLOBAL ERROR HANDLING =====
+process.on('uncaughtException', (error) => {
+  console.error('[Kritik Xəta] Tutulmayan xəta:', error);
+  dialog.showErrorBox(
+    'Proqram Xətası',
+    `Gözlənilməz xəta baş verdi:\n\n${error.message}\n\nProqram davam edəcək, lakin bəzi funksiyalar işləməyə bilər.`
+  );
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Kritik Xəta] İdarə olunmamış Promise:', reason);
+});
+
 let mainWindow;
-let server;
 
 // Server port
 const PORT = 3001;
@@ -185,8 +197,8 @@ function startServer() {
       // Run server in-process (not as child process)
       const expressApp = require('./server');
       
-      // Give server a moment to bind to port
-      setTimeout(resolve, 1500);
+      // Give server more time to bind to port and be ready
+      setTimeout(resolve, 3000);
     } catch (error) {
       reject(error);
     }

@@ -78,19 +78,8 @@ function LicenseActivation({ onActivated }) {
   };
 
   const formatLicenseKey = (value) => {
-    // Remove all non-alphanumeric characters
-    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    
-    // Add HEKIM- prefix if not present
-    if (!cleaned.startsWith('HEKIM')) {
-      // Auto-format: HEKIM-XXXXX-XXXXX-XXXXX-XXXXX
-      const parts = cleaned.match(/.{1,5}/g) || [];
-      if (parts.length > 0 && parts[0] !== 'HEKIM') {
-        return 'HEKIM-' + parts.slice(0, 4).join('-');
-      }
-    }
-    
-    return value.toUpperCase();
+    // Just uppercase and trim, keep dashes and numbers
+    return value.toUpperCase().trim();
   };
 
   if (loading) {
@@ -111,7 +100,7 @@ function LicenseActivation({ onActivated }) {
       <div className="license-card">
         <div className="license-header">
           <FiKey className="license-icon" />
-          <h1>Həkim Borc Dəftəri</h1>
+          <h1>Həkim dəftəri</h1>
           <p>Lisenziya Aktivasiyası</p>
         </div>
 
@@ -149,7 +138,7 @@ function LicenseActivation({ onActivated }) {
             placeholder="HEKIM-XXXXX-XXXXX-XXXXX-XXXXX"
             value={licenseKey}
             onChange={(e) => setLicenseKey(formatLicenseKey(e.target.value))}
-            maxLength={30}
+            maxLength={42}
           />
         </div>
 

@@ -26,6 +26,10 @@ Həkimlər üçün xəstə borc və nisyə idarəetmə proqramı.
 
 Suallarınız üçün əlaqə saxlayın.
 
+## Müəllif
+
+**Asaadoff**
+
 ## Lisenziya
 
 Bu proqram lisenziyalıdır. Lisenziyasız istifadə qadağandır.
